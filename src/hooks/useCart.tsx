@@ -8,15 +8,15 @@ interface CartProviderProps {
 }
 
 interface UpdateProductAmount {
-  productId: number;
+  id: number;
   amount: number;
 }
 
 interface CartContextData {
   cart: Product[];
-  addProduct: (productId: number) => Promise<void>;
-  removeProduct: (productId: number) => void;
-  updateProductAmount: ({ productId, amount }: UpdateProductAmount) => void;
+  addProduct: (id: number) => Promise<void>;
+  removeProduct: (id: number) => void;
+  updateProductAmount: ({ id, amount }: UpdateProductAmount) => void;
 }
 
 const CartContext = createContext<CartContextData>({} as CartContextData);
@@ -73,19 +73,37 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
       const newCart = tempCart.filter(product => product.id !== productId)
 
       setCart(newCart)
+      localStorage.setItem('@RocketShoes:cart', JSON.stringify(newCart))
     } catch {
       toast.error('Erro na remoção do produto');
     }
   };
 
   const updateProductAmount = async ({
-    productId,
+    id: productId,
     amount,
   }: UpdateProductAmount) => {
     try {
-      // TODO
+      const newCart = [...cart]
+      const product = newCart.find(product => product.id === productId)
+      const productIndex = newCart.findIndex(prd => prd === product)
+      const stockAmount = await api.get(`/stock/${productId}`).then(response => response.data.amount)
+
+      if (product && productIndex >= 0) {
+        const newProduct = {
+          ...product,
+          amount: amount
+        }
+        newCart[productIndex] = newProduct
+
+        if (newProduct.amount >= stockAmount) {
+          throw new Error('Quantidade solicitada fora de estoque')
+        }
+      }
+      setCart(newCart)
+      localStorage.setItem('@RocketShoes:cart', JSON.stringify(newCart))
     } catch {
-      // TODO
+      toast.error('Quantidade solicitada fora de estoque')
     }
   };
 
