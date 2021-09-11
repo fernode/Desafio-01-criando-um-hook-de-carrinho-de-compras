@@ -4,6 +4,7 @@ import {
   MdAddCircleOutline,
   MdRemoveCircleOutline,
 } from 'react-icons/md';
+import { idText } from 'typescript';
 
 import { useCart } from '../../hooks/useCart';
 import { formatPrice } from '../../util/format';
@@ -34,29 +35,17 @@ const Cart = (): JSX.Element => {
     )
 
   function handleProductIncrement(product: Product) {
-    const tempProduct = {...product}
-    const amount = tempProduct.amount += 1
+    const newProduct = {...product}
+    const amount = newProduct.amount += 1
     
-    const newProduct = {
-      ...tempProduct,
-      productId: tempProduct.id,
-      amount: amount
-    }
-    
-    updateProductAmount(newProduct)
+    updateProductAmount({productId: newProduct.id, amount})
   }
 
   function handleProductDecrement(product: Product) {
-    const tempProduct = {...product}
-    const amount = tempProduct.amount -= 1
+    const newProduct = {...product}
+    const amount = newProduct.amount -= 1
     
-    const newProduct = {
-      ...tempProduct,
-      productId: tempProduct.id,
-      amount: amount
-    }
-    
-    updateProductAmount(newProduct)
+    updateProductAmount({productId: newProduct.id, amount})
   }
 
   function handleRemoveProduct(productId: number) {
